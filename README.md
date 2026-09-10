@@ -1,34 +1,38 @@
-# Debian fully automatic install through ISO remastering
-Script and configuration to remaster a debian netinst ISO for 100% unattended install
+# Debian fully automatic install — preseed ISO remastering
 
-Usage:
-1. Download a [debian "netinst"](https://www.debian.org/CD/netinst/) image (tested with bullseye)
-2. Adapt the preseed.cfg file to your needs. (This one installs just SSH and sudo)
-3. Add grub config `ipv6.disable=1 cgroup_enable=memory swapaccount=1`
-4. Adapt the ssh public key and root password to your own 
-5. Adapt the locale and timezone in your favor
-6. Run:
-```
+Remaster a Debian netinst ISO for 100% unattended install. No boot menu prompt. No hands.
+
+## Quickstart
+
+```bash
+# Download debian-11.x.x-amd64-netinst.iso from https://www.debian.org/CD/netinst/
+# Adapt preseed.cfg: SSH key, passwords, locale, timezone
 ./make-preseed-iso.sh debian-11.0.0-amd64-netinst.iso
 ```
-This will create a new ISO image named `preseed-debian-11.0.0-amd64-netinst.iso` that
-installs debian on the first available disk without intervention, not even a boot menu prompt.
 
-### WARNING: This deletes stuff!
+Output: `preseed-debian-11.0.0-amd64-netinst.iso` — boots and installs on the first non-USB disk.
 
-The preseed.cfg that in this repository ***completely erases the first disk\*\****
+## Preseed defaults
 
-> ** as returned by `list-devices disk`, excluding usb
+- **Hostname** — random 10-char `debian-xxxx` (from `/dev/urandom`)
+- **Users** — `root` + `ops`, password `p@ssw0rd`, SSH key via authorized_keys
+- **Partitioning** — EFI + ext4 root + swap (atomic recipe)
+- **Packages** — minimal: standard + ssh-server + vim + sudo
+- **Kernel params** — `cgroup_enable=memory swapaccount=1`
+- **IPv4 preference** — `/etc/gai.conf` gets `precedence ::ffff:0:0/96 100` so dual-stack DNS resolves IPv4 first. IPv6 kernel support stays *on*. Removal of `ipv6.disable=1` (now handled automatically).
 
-Also... open the script and read what it does. I made this for myself because I'm tired of hitting
-enter 40 times everytime I need to install debian.
+## ⚠ Warning
 
-The location of the initrd is hardcoded to 'install.amd', this needs to be changed if you are using an iso
-for other than amd64.
+**This erases the first disk** (`list-devices disk`, excluding USB) — no confirmation. Test on a throwaway machine or VM first.
 
-The configuration for the boot menu options is specific to bullseye in the case of a UEFI system because grub uses the position of the entry to specify the default option.
+## Notes
 
-### More on how to preseed
-* https://wiki.debian.org/DebianInstaller/Preseed
-* https://wiki.debian.org/DebianInstaller/Preseed/EditIso
-* https://wiki.debian.org/RepackBootableISO
+- initrd path hardcoded to `install.amd` — requires amd64 netinst ISO
+- GRUB boot entry selection by position — bullseye-specific for UEFI
+- Edit preseed.cfg, re-run the script. That's it.
+
+## References
+
+- [Debian Preseed docs](https://wiki.debian.org/DebianInstaller/Preseed)
+- [Edit ISO howto](https://wiki.debian.org/DebianInstaller/Preseed/EditIso)
+- [ISO repacking](https://wiki.debian.org/RepackBootableISO)
