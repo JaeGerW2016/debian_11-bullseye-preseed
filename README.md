@@ -15,7 +15,7 @@ Output: `preseed-debian-11.0.0-amd64-netinst.iso` — boots and installs on the 
 ## Preseed defaults
 
 - **Hostname** — random 10-char `debian-xxxx` (from `/dev/urandom`)
-- **Users** — `root` + `ops`, password `p@ssw0rd`, SSH key via authorized_keys
+- **Users** — `root` + `ops`, password `YourPassword`, SSH key via authorized_keys
 - **Partitioning** — EFI + ext4 root + swap (atomic recipe)
 - **Packages** — minimal: standard + ssh-server + vim + sudo
 - **Kernel params** — `cgroup_enable=memory swapaccount=1`
